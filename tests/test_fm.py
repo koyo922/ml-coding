@@ -21,14 +21,14 @@ def test_predict():
             .train_test_split(0.2).split_x_y()
             # feature scaling after train/test split, to avoid future function
             .transform_x(preprocessing.MinMaxScaler(feature_range=(0, 1)).fit_transform)
-            .transform_y(lambda y: y * 2 - 1)  # 0/1 -> -1/+1
+            .transform_y(lambda y: (y * 2 - 1).values)  # 0/1 -> -1/+1
             .get_x_y()
     )
 
     fm = FM()
 
     with timing(label='training FM'):
-        fm.fit(X=x_trn, Y=y_trn, k=4, num_epoch=100, eta=0.01)
+        fm.fit(X=x_trn, Y=y_trn, k=4, num_epoch=500, eta=1e-3)  # 如果是标量训练，eta可以大一些
         logger.info(f'params: w_0={fm.w_0}, w_1={fm.w_1}, v={fm.v}')
 
     y_pred = fm.predict(x_trn)

@@ -27,20 +27,15 @@ class FM(BaseModel):
         self.v = np.random.normal(0, 0.2, size=(n, k))  # params for 2-order
 
         for epoch in range(num_epoch):
-            for x, y in zip(X, Y):  # using single sample once for a time.
-                inter_1 = x @ self.v  # (1,n)@(n,k) -> (1,k)
-                inter_2 = (x ** 2) @ (self.v ** 2)
-                interaction = 1 / 2 * (inter_1 ** 2 - inter_2).sum()
-                y_hat = self.w_0 + x @ self.w_1 + interaction  # 计算预测的输出，即FM的全部项之和
-
-                d_L_yhat = (self.sigmoid(y * y_hat.item()) - 1) * y  # logit loss over +1/-1
-                self.w_0 -= eta * d_L_yhat
-                self.w_1 -= (eta * d_L_yhat) * x
-                self.v -= (eta * d_L_yhat) * (
-                        x.reshape(-1, 1) @ inter_1.reshape(1, -1)  # 行看x, 列看inter
-                        - np.diag(x ** 2) @ self.v  # 矩阵每行乘以 x^2
-                    # - (x ** 2).reshape(-1, 1) * self.v  # 等效的ndarray广播写法
-                )
+            Y_hat = self.predict(X)
+            d_L_yhat = (self.sigmoid(Y * Y_hat) - 1) * Y  # 每行不同方向和权重 (m,)
+            self.w_0 -= eta * d_L_yhat.sum()
+            self.w_1 -= (eta * d_L_yhat) @ X
+            weight = (eta * d_L_yhat).reshape(-1, 1)
+            self.v -= (
+                    X.T @ (X * weight) @ self.v  # 行看x, 列看inter
+                    - np.diag(((X ** 2) * weight).sum(axis=0)) @ self.v  # 二阶权重矩阵每行乘以 x^2
+            )
 
             if epoch % 10 == 0:
                 loss = self.get_loss(self.predict(X), Y)
@@ -66,4 +61,4 @@ class FM(BaseModel):
 
     # 评估预测的准确性
     def get_accuracy(self, Y_pred, Y_true):
-        return (Y_pred * Y_true).ge(0).mean()
+        return ((Y_pred * Y_true) >= 0).mean()
