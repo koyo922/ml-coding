@@ -28,7 +28,6 @@ def test_predict():
     )
 
     fm = FM()
-
     with timing(label='training FM'):
         fm.fit(X=x_trn, Y=y_trn, k=4, num_epoch=500, eta=1e-3)  # 如果是标量训练，eta可以大一些
         logger.info(f'params: w_0={fm.w_0}, w_1={fm.w_1}, v={fm.v}')
@@ -39,8 +38,8 @@ def test_predict():
     y_pred_tst = fm.predict(x_tst)  # 得到训练的准确性
     logger.info(f"测试准确性为：{fm.get_accuracy(y_pred_tst, y_tst)}")
 
-    y_pred_xgb = xgb.XGBClassifier(max_depth=2, learning_rate=1e-2, n_estimators=5, verbosity=1) \
-                     .fit(x_trn, (y_trn + 1) / 2).predict(x_tst) * 2 - 1
+    y_pred_xgb = (xgb.XGBClassifier(max_depth=2, learning_rate=1e-2, n_estimators=5, verbosity=1)
+                  .fit(x_trn, (y_trn + 1) / 2).predict(x_tst) * 2 - 1)
     logger.info(f"测试准确性(baseline-xgb)为：{fm.get_accuracy(y_pred_xgb, y_tst)}")
 
     y_pred_elasticnet = ElasticNet().fit(x_trn, (y_trn + 1) / 2).predict(x_tst) * 2 - 1
