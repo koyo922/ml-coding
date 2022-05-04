@@ -6,6 +6,8 @@ Authors: qianweishuo<qianweishuo@bytedance.com>
 Date:    2022/5/4 10:47 AM
 """
 from sklearn import preprocessing
+from sklearn.linear_model import ElasticNet
+import xgboost as xgb
 
 from ml_coding.base_model import timing
 from ml_coding.data import DatasetDiabetes
@@ -36,3 +38,10 @@ def test_predict():
 
     y_pred_tst = fm.predict(x_tst)  # 得到训练的准确性
     logger.info(f"测试准确性为：{fm.get_accuracy(y_pred_tst, y_tst)}")
+
+    y_pred_xgb = xgb.XGBClassifier(max_depth=2, learning_rate=1e-2, n_estimators=5, verbosity=1) \
+                     .fit(x_trn, (y_trn + 1) / 2).predict(x_tst) * 2 - 1
+    logger.info(f"测试准确性(baseline-xgb)为：{fm.get_accuracy(y_pred_xgb, y_tst)}")
+
+    y_pred_elasticnet = ElasticNet().fit(x_trn, (y_trn + 1) / 2).predict(x_tst) * 2 - 1
+    logger.info(f"测试准确性(baseline-elasticnet)为：{fm.get_accuracy(y_pred_elasticnet, y_tst)}")

@@ -28,7 +28,7 @@ class FM(BaseModel):
         self.v = np.random.normal(0, 0.2, size=(n, k))  # params for 2-order
 
         for epoch in range(num_epoch):
-            Y_hat = self.predict(X)
+            Y_hat = self.predict(X)  # 正则项比较麻烦，手写版本就省略了。在pytorch版本中比较好实现一些。
             d_L_yhat = (self.sigmoid(Y * Y_hat) - 1) * Y  # 每行不同方向和权重 (m,)
             self.w_0 -= eta * d_L_yhat.sum()
             self.w_1 -= (eta * d_L_yhat) @ X
