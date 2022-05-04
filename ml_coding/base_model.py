@@ -13,10 +13,15 @@ import arrow
 import numpy as np
 
 
+# noinspection PyPep8Naming
 class BaseModel:
     @staticmethod
     def sigmoid(x):
         return 1.0 / (1 + np.exp(-x))
+
+    @staticmethod
+    def get_accuracy(Y_pred, Y_true):
+        return ((Y_pred * Y_true) >= 0).mean()
 
 
 class TimingResult:

@@ -16,6 +16,7 @@ from ml_coding.util import init_log
 logger = init_log(__name__)
 
 
+# noinspection PyPep8Naming
 class FM(BaseModel):
     def __init__(self):
         self.w_0, self.w_1, self.v = 0, None, None
@@ -59,6 +60,4 @@ class FM(BaseModel):
         )
         return y_hat
 
-    # 评估预测的准确性
-    def get_accuracy(self, Y_pred, Y_true):
-        return ((Y_pred * Y_true) >= 0).mean()
+
