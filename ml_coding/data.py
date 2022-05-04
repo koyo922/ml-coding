@@ -23,13 +23,15 @@ class Dataset:
     def pkl_path(self):
         return f'cache/{self.__class__.__name__}.pkl'
 
-    def fetch(self):
-        if os.path.exists(self.pkl_path):
+    def fetch(self, read_cache=True, write_cache=True):
+        if read_cache and os.path.exists(self.pkl_path):
             self.df_samples = pd.read_pickle(self.pkl_path)
         elif self.uri.endswith('.csv'):
             self.df_samples = pd.read_csv(self.uri)
         else:
             raise NotImplementedError(f'---------- unsupported fetch() for object={repr(self)}')
+        if write_cache and not os.path.exists(self.pkl_path):
+            self.df_samples.to_pickle(self.pkl_path)
         return self
 
     def train_test_split(self, test_size=0.3):
